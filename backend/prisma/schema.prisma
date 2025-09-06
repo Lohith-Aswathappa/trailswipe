@@ -1,0 +1,112 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile Profile?
+  swipes  Swipe[]
+  matches1 Match[] @relation("UserMatches1")
+  matches2 Match[] @relation("UserMatches2")
+  friendships Friendship[] @relation("UserFriendships")
+  friendOf    Friendship[] @relation("FriendOf")
+
+  @@map("users")
+}
+
+model Profile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  preferences Json     // Store user preferences as JSON
+  location    Json?    // Store location as GeoJSON
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("profiles")
+}
+
+model Trail {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  distance    Float    // in kilometers
+  elevation   Float    // in meters
+  difficulty  String   // easy, moderate, hard, expert
+  tags        String[] // array of tags
+  location    Json     // GeoJSON point
+  photos      Photo[]
+  swipes      Swipe[]
+  matches     Match[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("trails")
+}
+
+model Photo {
+  id        String   @id @default(cuid())
+  trailId   String
+  trail     Trail    @relation(fields: [trailId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String?
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("photos")
+}
+
+model Swipe {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trailId   String
+  trail     Trail    @relation(fields: [trailId], references: [id], onDelete: Cascade)
+  direction String   // left, right, up (bucket list)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, trailId])
+  @@map("swipes")
+}
+
+model Match {
+  id        String   @id @default(cuid())
+  userId1   String
+  user1     User     @relation("UserMatches1", fields: [userId1], references: [id], onDelete: Cascade)
+  userId2   String
+  user2     User     @relation("UserMatches2", fields: [userId2], references: [id], onDelete: Cascade)
+  trailId   String
+  trail     Trail    @relation(fields: [trailId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId1, userId2, trailId])
+  @@map("matches")
+}
+
+model Friendship {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation("UserFriendships", fields: [userId], references: [id], onDelete: Cascade)
+  friendId  String
+  friend    User     @relation("FriendOf", fields: [friendId], references: [id], onDelete: Cascade)
+  status    String   // pending, accepted, blocked
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, friendId])
+  @@map("friendships")
+}
