@@ -137,7 +137,7 @@ export const CardDemo: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#1a1a1a',
   },
   cardContainer: {
     flex: 1,

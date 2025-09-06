@@ -145,9 +145,11 @@ export const SimpleSwipeCard: React.FC<SimpleSwipeCardProps> = ({
         {/* Image Container */}
         <View style={styles.imageContainer}>
           <Image
-            source={{ uri: trail.photos?.[0]?.url || 'https://via.placeholder.com/400x600' }}
+            source={{ uri: trail.photos?.[0]?.url || 'https://picsum.photos/800/600?random=1' }}
             style={styles.image}
             resizeMode="cover"
+            defaultSource={{ uri: 'https://picsum.photos/800/600?random=1' }}
+            onError={() => console.log('Image failed to load for trail:', trail.name)}
           />
           
           {/* Overlay for text readability */}
@@ -248,14 +250,16 @@ const styles = StyleSheet.create({
   imageContainer: {
     flex: 1,
     position: 'relative',
-    backgroundColor: '#f0f0f0', // Fallback background color
+    backgroundColor: '#000', // Dark fallback to prevent grey areas
   },
   image: {
-    width: '100%',
-    height: '100%',
     position: 'absolute',
     top: 0,
     left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
   },
   overlay: {
     position: 'absolute',
